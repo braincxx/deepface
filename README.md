@@ -1,43 +1,91 @@
 # FACE SWAP
 # WHAT WE USE?
-- [DIFFUSERS](https://huggingface.co/docs/diffusers/index)
-- [controler_aux](https://github.com/huggingface/controlnet_aux)
 - [INSIGHFACE](https://github.com/deepinsight/insightface)
--  [IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion Models](https://github.com/tencent-ailab/IP-Adapter)
+- [DIFFUSERS](https://huggingface.co/docs/diffusers/index)
+- [CONTROLER_AUX](https://github.com/huggingface/controlnet_aux)
+- [IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion Models](https://github.com/tencent-ailab/IP-Adapter)
 - [GFPGAN](https://github.com/TencentARC/GFPGAN)
 
 
 
-# Основные Шаги Работы
-1. Детекция и Выравнивание Лица
-Загрузите изображение с помощью cv2.
-Используйте FaceAnalysis из InsightFace для обнаружения лиц на изображении.
-Выровняйте лицо по ключевым точкам.
-2. Извлечение Эмбеддингов
+# Архитектура модели
 
+Архитектура модели представляет собой последовательное взаимодействие нескольких компонентов, каждый из которых выполняет конкретную задачу в процессе генерации изображения. Below приведено описание шаг за шагом:
 
-4. Создание Масок Лица
-Создайте маску лица с использованием ключевых точек от InsightFace или MediaPipe FaceMesh.
+---
 
-5. Генерация Результата С Инпейтингом И Адаптером IP-FaceID+
-Используйте Stable Diffusion Inpaint Pipeline Legacy вместе с адаптером IP-FaceID+ для генерации результата на основе исходного изображения, маски лица и эмбеддингов лица.
+## 1. **Анализ лица**
+   - **Библиотека:** `insightface`
+   - **Модель:** `buffalo_l`
+   - **Описание:** 
+     - Из исходного изображения (`path_source`) извлекаются данные о лице, включая:
+       - landmarks лица.
+       - embedding лица.
+     - То же самое выполняется для целевого изображения (`path_target`).
 
+---
+
+## 2. **Создание маски лица**
+   - **Описание:** 
+     - На основе кепок лица создается бинарная маска, где область лица заполнена белым цветом.
+     - Маска используется для определения области, которая будет заменена при инпейтинге.
+
+---
+
+## 3. **Подготовка контрольных изображений**
+   - **Описание:** 
+     - Из целевого изображения генерируются контрольные изображения:
+       - Обнаружение контуров тела (OpenPose).
+       - Обработка краев (Canny).
+     - Эти изображения помогают сохранять позу и контуры тела при генерации нового изображения.
+
+---
+
+## 4. **Выравнивание лиц**
+   - **Описание:** 
+     - Выравнивание лица из исходного изображения с лицом из целевого изображения.
+     - Используется аффинное преобразование для соответствия позы и ориентации лиц.
+
+---
+
+## 5. **Генерация изображения**
+   - **Библиотека:** `DIFFUSERS`
+   - **Модель:** `StableDiffusionInpaintPipeline`
+   - **IP-ADATER** 'IPAdapterFaceIDPlus'
+   - **Описание:** 
+     - Используется для замены области лица в целевом изображении на выровненное лицо из исходного изображения.
+     - Учитываются контрольные изображения и маска для сохранения контуров и позы.
+     - Параметры:
+       - Промпт: "Generate a highly realistic face swap with the reference face seamlessly integrated into the target image. The result should be photorealistic"
+       - Негативный промпт: "Do not include any visible artifacts, such as plastic-like skin, fish-eye effects, or unrealistic textures"
+       - Количество шагов диффузии: 40
+       - Семя: 20232
+
+---
+
+## 6. **Восстановление изображения**
+   - **Библиотека:** `GFPGAN`
+   - **Модель:** `GFPGANv1.4`
+   - **Описание:** 
+     - Улучшение качества полученного изображения.
+     - Устранение артефактов и повышение резкости.
+     - Параметры:
+       - Увеличение: 2x
+       - Архитектура: clean
+       - Умножитель каналов: 2
 
 
 ## Installation
 
 ```
-# install latest diffusers
-pip install diffusers==0.22.1
+#CREATE ENV CONDA
 
-# install ip-adapter
-pip install git+https://github.com/tencent-ailab/IP-Adapter.git
+conda create --name sd-faceswap
 
-# download the models
-cd IP-Adapter
-git lfs install
-git clone https://huggingface.co/h94/IP-Adapter
+#install req
+conda activate sd-faceswap
+pip install -r requirements.txt
 
-# then you can use the main.py
+usage: main.py [-h] --source SOURCE --target TARGET --output OUTPUT
 ```
 
