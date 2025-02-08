@@ -86,13 +86,26 @@ conda create --name sd-faceswap
 conda activate sd-faceswap
 pip install -r requirements.txt
 
+#download model
+wget https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth
+wget https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sd15.bin
+
 usage: main.py [-h] --source SOURCE --target TARGET --output OUTPUT
 ```
 
-## RESULT
+## RESULTS
 
 | Target Image  | Result Image  |
 |---------------------------------------------|---------------------------------------------|
 | <img src="./target_image/1.jpg" width="400" > | <img src="./result_image/1.jpg_1.jpg.jpg" width="400" > |
 | <img src="./target_image/2.jpg" width="400" > | <img src="./result_image/1.jpg_2.jpg.jpg" width="400" > |
 | <img src="./target_image/3.jpg" width="400" > | <img src="./result_image/1.jpg_3.jpg.jpg" width="400" > |
+
+
+## RESULTS (without SD)
+
+| Target Image  | Result Image  |
+|---------------------------------------------|---------------------------------------------|
+| <img src="./target_image/1.jpg" width="400" > | <img src="./roop/save_target.jpg" width="400" > |
+| <img src="./target_image/2.jpg" width="400" > | <img src="./roop/result_2.jpg" width="400" > |
+| <img src="./target_image/3.jpg" width="400" > | <img src="./roop/result_3.jpg" width="400" > |
