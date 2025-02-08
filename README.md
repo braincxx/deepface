@@ -89,3 +89,10 @@ pip install -r requirements.txt
 usage: main.py [-h] --source SOURCE --target TARGET --output OUTPUT
 ```
 
+## RESULT
+
+| Target Image  | Result Image  |
+|---------------------------------------------|---------------------------------------------|
+| <img src="./target_image/1.jpg" width="400" > | <img src="./result_image/1.jpg_1.jpg.jpg" width="400" > |
+| <img src="./target_image/2.jpg" width="400" > | <img src="./result_image/1.jpg_2.jpg.jpg" width="400" > |
+| <img src="./target_image/3.jpg" width="400" > | <img src="./result_image/1.jpg_3.jpg.jpg" width="400" > |
